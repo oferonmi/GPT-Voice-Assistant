@@ -40,14 +40,14 @@ def speak(text):
 def main():
   while True:
     # prompt user to say 'viki' to indicate intention to communicate
-    print("Say 'VIKI' and ask your question ...")
+    print("Say 'VIKI' to start recording your question...")
     with sr.Microphone() as source:
       recognizer = sr.Recognizer()
       audio = recognizer.listen(source)
       try:
         transcription = recognizer.recognize_google(audio)
         if transcription.lower == "viki":
-          # record user audio
+          # record audio
           in_audio_filename = "input.wav"
           print("Ask your question ...")
           with sr.Microphone() as source:
@@ -57,19 +57,19 @@ def main():
                                       phrase_time_limit=None,
                                       timeout=None)
             with open(in_audio_filename, "wb") as f:
-              f.write(audio.get_wave_data())
+              f.write(audio.get_wav_data())
 
           # transcribe audio to text
           text = transcribe_audio_to_text(in_audio_filename)
           if text:
             print("You said: {}".format(text))
 
-          # generate response
-          response = generate_response(text)
-          print("GPT-3 says: {}".format(response))
+            # generate response
+            response = generate_response(text)
+            print("GPT-3 says: {}".format(response))
 
-          #read out response
-          speak(response)
+            #read out response
+            speak(response)
 
       except Exception as e:
         print("An error occured: {}".format(e))
