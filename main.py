@@ -113,6 +113,7 @@ def main(gpt_version):
 
             #read out response
             speak(response)
+            speak("I hope that helped. You can ask your next question.")
 
         except sr.RequestError: 
           print("API unavailable")
