@@ -80,6 +80,7 @@ def main():
               f.write(audio.get_wav_data())
 
           # transcribe audio to text
+          # text = sr_transcribe_audio_to_text(in_audio_filename)
           text = whisper_transcribe_audio_to_text(in_audio_filename)
           if text:
             print("You said: '{}'.".format(text))
