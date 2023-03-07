@@ -19,12 +19,21 @@ engine = tts.init()
 # engine.setProperty('voice', voices[-1].id)
 
 
-def transcribe_audio_to_text(file_name):
+def sr_transcribe_audio_to_text(file_name):
   recognizer = sr.Recognizer()
   with sr.AudioFile(file_name) as source:
     audio = recognizer.record(source)
   try:
     return recognizer.recognize_google(audio)
+  except:
+    print("Ah, let's give this another try.")
+
+
+def whisper_transcribe_audio_to_text(file_name):
+  audio_file = open(file_name, "rb")
+  try:
+    transcript = openai.Audio.transcribe("whisper-1", audio_file)
+    return transcript["text"]
   except:
     print("Ah, let's give this another try.")
 
@@ -71,7 +80,7 @@ def main():
               f.write(audio.get_wav_data())
 
           # transcribe audio to text
-          text = transcribe_audio_to_text(in_audio_filename)
+          text = whisper_transcribe_audio_to_text(in_audio_filename)
           if text:
             print("You said: '{}'.".format(text))
 
