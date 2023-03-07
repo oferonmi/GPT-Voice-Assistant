@@ -15,6 +15,8 @@ openai.api_key =  os.environ['OPENAI_API_KEY'] # os.getenv("OPENAI_API_KEY")
 
 # text-to-speech engine instance
 engine = tts.init()
+# voices = engine.getProperty('voices')
+# engine.setProperty('voice', voices[-1].id)
 
 
 def transcribe_audio_to_text(file_name):
