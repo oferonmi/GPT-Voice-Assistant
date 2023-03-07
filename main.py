@@ -1,7 +1,9 @@
 import openai
 import pyttsx3 as tts
 import speech_recognition as sr
-#import time
+import time
+
+from py_error_handler import noalsaerr # to suppress ALSA lib dumps
 
 import os
 
@@ -42,20 +44,24 @@ def speak(text):
 
 def main(): 
   while True:
-    # prompt user to say 'viki' to indicate intention to communicate
-    print("Say 'VIKI' to start recording your question...")
-    with sr.Microphone() as source:
+    # TODO find and fix cause for the dumps
+    with noalsaerr():  # suppress ALSA lib dumps for now. remove when dump issues are fixed
       recognizer = sr.Recognizer()
-      audio = recognizer.listen(source)
-      try:
-        transcription = recognizer.recognize_google(audio)
-        if transcription.lower in ["viki", "vicky", "vickey"]:
+      # initial prompt ('Hey! Lex' in this case) to begin recording
+      print("Say 'Hey Lex' to record your question...")
+      #time.sleep(2)
+      with sr.Microphone() as source:
+        recognizer.adjust_for_ambient_noise(source)
+        audio = recognizer.listen(source)
+        try:
+          transcription = recognizer.recognize_google(audio)
+          #if transcription.lower == "lex":
           # record audio
           in_audio_filename = "input.wav"
-          print("Ask your question ...")
+          print("I am listening. Ask your question ...")
           with sr.Microphone() as source:
-            recognizer = sr.Recognizer()
             source.pause_threshold = 1
+            recognizer.adjust_for_ambient_noise(source)
             audio = recognizer.listen(source,
                                       phrase_time_limit=None,
                                       timeout=None)
@@ -65,17 +71,23 @@ def main():
           # transcribe audio to text
           text = transcribe_audio_to_text(in_audio_filename)
           if text:
-            print("You said: {}".format(text))
+            print("You said: '{}'.".format(text))
 
             # generate response
             response = generate_response(text)
-            print("GPT-3 says: {}".format(response))
+            print("GPT-3 response: {}".format(response))
 
             #read out response
             speak(response)
 
-      except Exception as e:
-        print("An error occured: {}".format(e))
+        except sr.RequestError: 
+          print("API unavailable")
+
+        except sr.UnknownValueError:
+          print("Unable to recognize speech")
+
+        # except sr.RequestError:  # Exception as e:
+        #   print("An error occured: {}".format(e))
 
 
 if __name__ == "__main__":
