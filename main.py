@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv() # load environment variable from .env file
 
 # get OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")  #os.environ['OPENAI_API_KEY']
+openai.api_key =  os.environ['OPENAI_API_KEY'] # os.getenv("OPENAI_API_KEY")
 
 # text-to-speech engine instance
 engine = tts.init()
@@ -40,7 +40,7 @@ def speak(text):
   engine.runAndWait()
 
 
-def main():
+def main(): 
   while True:
     # prompt user to say 'viki' to indicate intention to communicate
     print("Say 'VIKI' to start recording your question...")
@@ -49,7 +49,7 @@ def main():
       audio = recognizer.listen(source)
       try:
         transcription = recognizer.recognize_google(audio)
-        if transcription.lower == "viki":
+        if transcription.lower in ["viki", "vicky", "vickey"]:
           # record audio
           in_audio_filename = "input.wav"
           print("Ask your question ...")
