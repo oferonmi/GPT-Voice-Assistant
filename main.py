@@ -81,7 +81,7 @@ def main(gpt_version):
           #if transcription.lower == "lex":
 
           print("I am listening. Ask your question ...")
-          speak("Yes. Ask your question")
+          speak("Yes. How may I be of help?")
 
           # record audio
           in_audio_filename = "input.wav"
