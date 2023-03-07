@@ -47,8 +47,8 @@ def main():
     # TODO find and fix cause for the dumps
     with noalsaerr():  # suppress ALSA lib dumps for now. remove when dump issues are fixed
       recognizer = sr.Recognizer()
-      # initial prompt ('Hey! Lex' in this case) to begin recording
-      print("Say 'Hey Lex' to record your question...")
+      # initial prompt ('Hey! Kai' in this case) to begin recording
+      print("Say 'Hey Kai' to record your question...")
       #time.sleep(2)
       with sr.Microphone() as source:
         recognizer.adjust_for_ambient_noise(source)
