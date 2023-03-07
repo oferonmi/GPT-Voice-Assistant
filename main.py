@@ -1,9 +1,12 @@
 import openai
 import pyttsx3 as tts
 import speech_recognition as sr
-import time
+#import time
 
 import os
+
+from dotenv import load_dotenv
+load_dotenv() # load environment variable from .env file
 
 # get OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")  #os.environ['OPENAI_API_KEY']
