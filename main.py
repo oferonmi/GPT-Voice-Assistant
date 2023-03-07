@@ -1,7 +1,6 @@
 import openai
 import pyttsx3 as tts
 import speech_recognition as sr
-import time
 
 from py_error_handler import noalsaerr # to suppress ALSA lib dumps
 
@@ -72,8 +71,9 @@ def main(gpt_version):
       recognizer = sr.Recognizer()
       # initial prompt ('Hey! Kai' in this case) to begin recording
       print("Say 'Hey Kai' to record your question...")
-      time.sleep(1)
+      
       with sr.Microphone() as source:
+        source.pause_threshold = 1
         recognizer.adjust_for_ambient_noise(source)
         audio = recognizer.listen(source)
         try:
@@ -127,4 +127,4 @@ def main(gpt_version):
 
 
 if __name__ == "__main__":
-  main("gpt-3") # change parameter to gpt-3.5 to use the latest gpt-3.5-turbo model
+  main("gpt-3.5") # change parameter to gpt-3.5 to use the latest gpt-3.5-turbo model
