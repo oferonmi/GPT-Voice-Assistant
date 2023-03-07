@@ -46,7 +46,7 @@ def speak(text):
 
 def main(): 
   while True:
-    # TODO find and fix cause for the dumps
+    # TODO find and fix cause of the ALSA dumps
     with noalsaerr():  # suppress ALSA lib dumps for now. remove when dump issues are fixed
       recognizer = sr.Recognizer()
       # initial prompt ('Hey! Kai' in this case) to begin recording
