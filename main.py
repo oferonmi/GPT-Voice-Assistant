@@ -90,7 +90,7 @@ def main():
 
         # except sr.RequestError:  # Exception as e:
         #   print("An error occured: {}".format(e))
-
+    # TODO create way to end question and answer loop smoothly
 
 if __name__ == "__main__":
   main()
