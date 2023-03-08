@@ -3,3 +3,4 @@ SpeechRecognition
 pyaudio
 pyttsx3
 python-dotenv
+pygame
