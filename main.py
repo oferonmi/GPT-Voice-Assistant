@@ -9,13 +9,14 @@ from py_error_handler import noalsaerr # to suppress ALSA lib dumps
 import os
 from dotenv import load_dotenv
 
-activate_idle_state_sound = True # Set to deactivate sound that play in idle sessions
-
 # load environment variable from .env file
 load_dotenv() 
 
 # get OpenAI API key
 openai.api_key =  os.environ['OPENAI_API_KEY'] # os.getenv("OPENAI_API_KEY")
+
+# activate (Tset to True) or deactivate (set to False) sound that play in idle sessions
+activate_idle_state_sound = True 
 
 # initialize module for loading and playing sounds
 mixer.init()
@@ -80,7 +81,7 @@ def tts_speak(text):
   # playsound("out.mp3")
   play_sound_file("out.mp3")
 
-
+# Function for handing sound file playback
 def play_sound_file(sound_file):
   # input - sound_file specifies path to sound file in string
   # mixer.init()
