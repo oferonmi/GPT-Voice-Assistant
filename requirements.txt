@@ -3,3 +3,6 @@ SpeechRecognition
 pyaudio
 pyttsx3
 python-dotenv
+pygame
+gTTS
+playsound
