@@ -13,16 +13,16 @@ An AI voice assistant based of OpenAI's ChatGPT API.
     ```
         brew install portaudio
     ```
-    - on all platforms, install dependencies
+    - On all platforms, install dependencies
     ```
         pip install -r requirements.txt
 
     ```
-    - to app in command line
+    - To use app in command line
     ```
         python main.py
     ```
-    - to app with graphical interface
+    - To use app with graphical interface
     ```
         python main_gui.py
     ```

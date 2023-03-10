@@ -1,7 +1,6 @@
 import openai
 import pyttsx3 as tts
 from gtts import gTTS
-# from playsound import playsound
 import speech_recognition as sr
 from pygame import mixer
 import time
@@ -18,6 +17,11 @@ openai.api_key =  os.environ['OPENAI_API_KEY'] # os.getenv("OPENAI_API_KEY")
 # activate (Tset to True) or deactivate (set to False) sound that play in idle sessions
 activate_idle_state_sound = True 
 
+# configure system response context and keep track of conversation thread
+msg_thread = [
+    {"role": "system", "content": "you are a very knowlegable assistant. Explain using first principles like physicist Richard Feynmann."},
+]
+
 # initialize module for loading and playing sounds
 mixer.init()
 
@@ -30,7 +34,7 @@ tts_engine = tts.init()
 # tts_engine.setProperty('voice', voices[-1].id)
 
 # functions for transcribing sound from file to text
-def sr_transcribe_audio_to_text(file_name):
+def sr_transcribe(file_name):
   recognizer = sr.Recognizer()
   with sr.AudioFile(file_name) as source:
     audio_data = recognizer.record(source)
@@ -40,7 +44,7 @@ def sr_transcribe_audio_to_text(file_name):
     print("Ah, let's give this another try.")
 
 
-def whisper_transcribe_audio_to_text(file_name):
+def whisper_transcribe(file_name):
   audio_data= open(file_name, "rb")
   # try:
   transcript = openai.Audio.transcribe("whisper-1", audio_data)
@@ -49,7 +53,7 @@ def whisper_transcribe_audio_to_text(file_name):
   #   print("Ah, let's give this another try.")
 
 # functions using OpenAI API to generate reponse to user query
-def generate_prompt_response(prompt):
+def get_prompt_response(prompt):
   response = openai.Completion.create(engine="text-davinci-003",
                                       prompt=prompt,
                                       max_tokens=4000,
@@ -59,16 +63,22 @@ def generate_prompt_response(prompt):
   return response["choices"][0]["text"]
 
 
-def generate_chat_response(msg):
+def get_chat_response(messages):
   response = openai.ChatCompletion.create(
       model="gpt-3.5-turbo",
-      messages=[
-          {"role": "system", "content": "you are a very knowlegable assistant."},
-          {"role": "user", "content": msg}
-      ]
+      messages=messages
   )
-  return response.choices[0].message["content"]
-  # return response["choices"][0]["message"]["content"]
+  return response["choices"][0]["message"]["content"]
+
+def get_transcript(msg_thread):
+  # format message thread
+    chat_transcript = ""
+    for message in msg_thread:
+        if message["role"] != "system":
+            chat_transcript += message["role"] + \
+                ": " + message["content"] + "\n\n"
+
+    return chat_transcript
 
 # functions to transcribe text string to sound
 def speak(text):
@@ -76,25 +86,25 @@ def speak(text):
   tts_engine.runAndWait()
 
 # TODO issue with incomplete text read out
-def tts_speak(text):
+def gtts_speak(text):
   tts = gTTS(text, lang="en", tld="co.uk")
   tts.save("out.mp3")
-  # playsound("out.mp3")
-  play_sound_file("out.mp3")
+  play_sound("out.mp3")
 
 # Function for handing sound file playback
-def play_sound_file(sound_file):
+def play_sound(sound_file):
   # input - sound_file specifies path to sound file in string
   # mixer.init()
   mixer.music.load(sound_file)
   mixer.music.play()
 
-def stop_playing_sound_file_gracefully():
+def stop_sound_gracefully():
   mixer.music.fadeout(2)
 
 # main
 def main(gpt_version): 
   # Input - gpt_version takes valid values of 'gpt-3' and 'gpt-3.5'
+  global msg_thread
 
   no_activity_period_count = 0 # for traking idle convo sessions
 
@@ -117,7 +127,7 @@ def main(gpt_version):
           # stop sound  triggered by possible previous inactivity
           if no_activity_period_count > 0:
             if activate_idle_state_sound:
-              stop_playing_sound_file_gracefully()
+              stop_sound_gracefully()
 
           #if transcription.lower == "kai":
           print("Yes. How may I be of help?")
@@ -138,19 +148,25 @@ def main(gpt_version):
               f.write(audio.get_wav_data())
 
           # transcribe audio to text
-          # text = sr_transcribe_audio_to_text(in_audio_filename)
-          text = whisper_transcribe_audio_to_text(in_audio_filename)
-          if text:
-            print("You said: '{}'.".format(text))
-            speak("You asked, '{}'.".format(text))
+          # text = sr_transcribe(in_audio_filename)
+          transcript = whisper_transcribe(in_audio_filename)
+          # add transcribed query to conversation thread
+          msg_thread.append({"role": "user", "content": transcript})
+
+          if transcript:
+            print("You said: '{}'.".format(transcript))
+            speak("You asked, '{}'.".format(transcript))
 
             # generate response
             if gpt_version == "gpt-3":
-              response = generate_prompt_response(text)
+              response = get_prompt_response(transcript)
+              print("GPT response: {}".format(response))
             elif gpt_version == "gpt-3.5":
-              response = generate_chat_response(text)
-
-            print("GPT response: {}".format(response))
+              response = get_chat_response(msg_thread)
+              # add GPT-3 response  to thread
+              msg_thread.append({"role": "assistant", "content": response})
+              # display message thread
+              print("Messages: \n\n{}".format(get_transcript(msg_thread)))
 
             #read out response
             speak(response)
@@ -169,7 +185,7 @@ def main(gpt_version):
           # speak("I could not hear you.") 
           # play a brief sound file for non active period
           if activate_idle_state_sound:
-            play_sound_file("ambient-music-0036.mp3")
+            play_sound("ambient-music-0036.mp3")
           
           # keep track of non activity
           no_activity_period_count += 1
