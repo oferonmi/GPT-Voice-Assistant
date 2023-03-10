@@ -42,11 +42,11 @@ def sr_transcribe_audio_to_text(file_name):
 
 def whisper_transcribe_audio_to_text(file_name):
   audio_data= open(file_name, "rb")
-  try:
-    transcript = openai.Audio.transcribe("whisper-1", audio_data)
-    return transcript["text"]
-  except:
-    print("Ah, let's give this another try.")
+  # try:
+  transcript = openai.Audio.transcribe("whisper-1", audio_data)
+  return transcript["text"]
+  # except:
+  #   print("Ah, let's give this another try.")
 
 # functions using OpenAI API to generate reponse to user query
 def generate_prompt_response(prompt):
@@ -63,6 +63,7 @@ def generate_chat_response(msg):
   response = openai.ChatCompletion.create(
       model="gpt-3.5-turbo",
       messages=[
+          {"role": "system", "content": "you are a very knowlegable assistant."},
           {"role": "user", "content": msg}
       ]
   )
@@ -74,7 +75,7 @@ def speak(text):
   tts_engine.say(text)
   tts_engine.runAndWait()
 
-# TODO issue with text incomplete text read out
+# TODO issue with incomplete text read out
 def tts_speak(text):
   tts = gTTS(text, lang="en", tld="co.uk")
   tts.save("out.mp3")
@@ -95,7 +96,7 @@ def stop_playing_sound_file_gracefully():
 def main(gpt_version): 
   # Input - gpt_version takes valid values of 'gpt-3' and 'gpt-3.5'
 
-  no_activity_period_count = 0 # for ending convo session automatically
+  no_activity_period_count = 0 # for traking idle convo sessions
 
   while True:
     # TODO find and fix cause of the ALSA dumps
