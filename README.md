@@ -7,7 +7,7 @@ An AI voice assistant based of OpenAI's ChatGPT API.
 2. Run the following commands
     - For GNU/Linux
     ```
-        sudo apt-get install python3-pyaudio
+        apt-get install python3-pyaudio
     ```
     - For Apple macOS
     ```
