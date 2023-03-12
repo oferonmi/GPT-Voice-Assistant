@@ -2,7 +2,7 @@
 An AI voice assistant based of OpenAI's ChatGPT API.
 
 # Usage Instructions
-1. Use the Secrets management utility of your development environment or a .env file to create an environment variable called 'OPENAI_API_KEY' and set it's value to your own API key from your OpenAI developer account page. 
+1. Use the Secrets management utility of your development environment or a .env file to create environment variables OPENAI_API_KEY and ELEVENLABS_API_KEY and set their values to your own OpenAI and Eleven Labs API keys respectively. 
 
 2. Run the following commands
     - For GNU/Linux
