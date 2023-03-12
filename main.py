@@ -32,12 +32,7 @@ msg_thread = [
 mixer.init()
 
 # text-to-speech engine instance
-tts_engine = tts.init()
-
-# TODO add a much smoother speech synthesizer 
-# voices = tts_engine.getProperty('voices')
-# print("Number of voices: {}".format(len(voices)))
-# tts_engine.setProperty('voice', voices[-1].id)
+tts_engine = tts.init() # TODO add a much smoother speech synthesizer 
 
 # functions for transcribing sound from file to text
 def sr_transcribe(file_name):
@@ -77,7 +72,7 @@ def get_chat_response(messages):
   return response["choices"][0]["message"]["content"]
 
 
-# fetches update transcript for each session
+# fetches updated transcript for each session
 def get_transcript(msg_thread):
   # format message thread
     chat_transcript = ""
@@ -94,7 +89,7 @@ def speak(text):
   tts_engine.say(text)
   tts_engine.runAndWait()
 
-# TODO issue with incomplete text read out
+# TODO issues with incomplete text read out
 def gtts_speak(text):
   tts = gTTS(text, lang="en", tld="co.uk")
   tts.save("out.mp3")
@@ -110,7 +105,7 @@ def elevenlabs_speak(text):
                       )
   resp_jdata=json.loads(response.content)
  
-  # randomly pick one the premade eleven labs voices
+  # randomly pick one the premade voices by eleven labs
   v_id = random.randrange(0, len(resp_jdata["voices"])-1, 1)
   voice_id = resp_jdata["voices"][v_id]["voice_id"]
 
@@ -232,8 +227,7 @@ def main(gpt_version):
           # keep track of non activity
           no_activity_period_count += 1
 
-    # Temporal way to end question and answer loop due to non activity
-    # stops session after 3 instance of no prompts.
+    # stops session after 5 session loops with no voice prompts from user.
     if no_activity_period_count > 5:
       time.sleep(2)
       speak("Bye for now.")
