@@ -1,21 +1,12 @@
-import openai
 import gradio as gr
 from main import whisper_transcribe
 from main import get_chat_response
 from main import get_transcript
-from main import speak, gtts_speak
-import os
-from dotenv import load_dotenv
-
-# load environment variable from .env file
-load_dotenv()
-
-# get OpenAI API key
-openai.api_key = os.environ['OPENAI_API_KEY']  # os.getenv("OPENAI_API_KEY")
+from main import speak, gtts_speak, elevenlabs_speak
 
 # configure system response context and keep track of conversation thread.
 msg_thread = [
-    {"role": "system", "content": "you are a very knowlegable assistant. Explain from first principles."},
+    {"role": "system", "content": "you are a very knowlegable assistant. Explain concepts from first principles."},
 ]
 
 # main interface function
@@ -32,7 +23,7 @@ def transcribe(audio):
     latest_resp = get_chat_response(msg_thread)
 
     # read out response
-    gtts_speak(latest_resp)
+    elevenlabs_speak(latest_resp)
 
     # add GPTS-3 response  to thread
     msg_thread.append({"role": "assistant", "content": latest_resp})

@@ -6,13 +6,19 @@ from pygame import mixer
 import time
 from py_error_handler import noalsaerr # to suppress ALSA lib dumps
 import os
+import requests
+import random
+import json
 from dotenv import load_dotenv
 
 # load environment variable from .env file
 load_dotenv() 
 
 # get OpenAI API key
-openai.api_key =  os.environ['OPENAI_API_KEY'] # os.getenv("OPENAI_API_KEY")
+openai.api_key =  os.environ['OPENAI_API_KEY'] 
+
+# get eleven labs API key
+elevenlabs_api_key = os.environ['ELEVENLABS_API_KEY']
 
 # activate (Tset to True) or deactivate (set to False) sound that play in idle sessions
 activate_idle_state_sound = True 
@@ -52,6 +58,7 @@ def whisper_transcribe(file_name):
   # except:
   #   print("Ah, let's give this another try.")
 
+
 # functions using OpenAI API to generate reponse to user query
 def get_prompt_response(prompt):
   response = openai.Completion.create(engine="text-davinci-003",
@@ -62,7 +69,6 @@ def get_prompt_response(prompt):
                                       temperature=0.5)
   return response["choices"][0]["text"]
 
-
 def get_chat_response(messages):
   response = openai.ChatCompletion.create(
       model="gpt-3.5-turbo",
@@ -70,6 +76,8 @@ def get_chat_response(messages):
   )
   return response["choices"][0]["message"]["content"]
 
+
+# fetches update transcript for each session
 def get_transcript(msg_thread):
   # format message thread
     chat_transcript = ""
@@ -80,7 +88,8 @@ def get_transcript(msg_thread):
 
     return chat_transcript
 
-# functions to transcribe text string to sound
+
+# functions for text-to-speech synthesis
 def speak(text):
   tts_engine.say(text)
   tts_engine.runAndWait()
@@ -91,7 +100,39 @@ def gtts_speak(text):
   tts.save("out.mp3")
   play_sound("out.mp3")
 
-# Function for handing sound file playback
+def elevenlabs_speak(text):
+  # get list of eleven labs voices
+  response = requests.get('https://api.elevenlabs.io/v1/voices', 
+                        headers={
+                          'accept': 'application/json',
+                          'xi-api-key': elevenlabs_api_key,
+                        }
+                      )
+  resp_jdata=json.loads(response.content)
+ 
+  # randomly pick one the premade eleven labs voices
+  v_id = random.randrange(0, len(resp_jdata["voices"])-1, 1)
+  voice_id = resp_jdata["voices"][v_id]["voice_id"]
+
+  # configure voice and feed text to remote eleven labs speech synthesis engine
+  response = requests.post(
+                'https://api.elevenlabs.io/v1/text-to-speech/{}'.format(voice_id), 
+                headers = {
+                  'accept': 'audio/mpeg',
+                  'xi-api-key': elevenlabs_api_key,
+                  'Content-Type': 'application/json',
+                },
+                json = {'text': text,}
+              )
+
+  # create and playback sound file
+  with open('out.mp3', 'wb') as f:
+      f.write(response.content)
+
+  play_sound("out.mp3")
+
+
+# Functions for handing sound file playback
 def play_sound(sound_file):
   # input - sound_file specifies path to sound file in string
   # mixer.init()
@@ -100,6 +141,7 @@ def play_sound(sound_file):
 
 def stop_sound_gracefully():
   mixer.music.fadeout(2)
+
 
 # main
 def main(gpt_version): 
@@ -113,8 +155,8 @@ def main(gpt_version):
     with noalsaerr():  # suppress ALSA lib dumps for now. remove when dump issues are fixed
       recognizer = sr.Recognizer()
 
-      # initial prompt ('Kai' in this case) to begin recording
-      print("Say 'Kai' to record your question...")
+      # initial prompt ('KAI' in this case) to begin recording
+      print("Say 'KAI' to record your question...")
       
       with sr.Microphone() as source:
         source.pause_threshold = 1
@@ -154,7 +196,7 @@ def main(gpt_version):
           msg_thread.append({"role": "user", "content": transcript})
 
           if transcript:
-            print("You said: '{}'.".format(transcript))
+            print("You asked: '{}'.".format(transcript))
             speak("You asked, '{}'.".format(transcript))
 
             # generate response
