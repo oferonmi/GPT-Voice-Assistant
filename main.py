@@ -16,9 +16,10 @@ load_dotenv()
 
 # get OpenAI API key
 openai.api_key =  os.environ['OPENAI_API_KEY'] 
-
 # get eleven labs API key
 elevenlabs_api_key = os.environ['ELEVENLABS_API_KEY']
+# get fastsppech API token from huggingface
+fastspeech_api_token = os.environ['HF_FASTSPEECH_API_TOKEN']
 
 # activate (Tset to True) or deactivate (set to False) sound that play in idle sessions
 activate_idle_state_sound = True 
@@ -85,17 +86,17 @@ def get_transcript(msg_thread):
 
 
 # functions for text-to-speech synthesis
-def speak(text):
+def pyttsx3_tts(text):
   tts_engine.say(text)
   tts_engine.runAndWait()
 
-# TODO issues with incomplete text read out
-def gtts_speak(text):
+# TODO issues with incomplete and slow text read out
+def gTranslate_tts(text):
   tts = gTTS(text, lang="en", tld="co.uk")
   tts.save("out.mp3")
-  play_sound("out.mp3")
+  play_sound("out.mp3") #os.system("mpg123 out.mp3") 
 
-def elevenlabs_speak(text):
+def elevenlabs_tts(text):
   # get list of eleven labs voices
   response = requests.get('https://api.elevenlabs.io/v1/voices', 
                         headers={
@@ -124,7 +125,41 @@ def elevenlabs_speak(text):
   with open('out.mp3', 'wb') as f:
       f.write(response.content)
 
-  play_sound("out.mp3")
+  play_sound("out.mp3") # os.system("mpg123 out.mp3")
+
+def fastspeech2_tts(text):
+  # feed text to remote fastspeech2 speech synthesis model
+  API_URL = "https://api-inference.huggingface.co/models/facebook/fastspeech2-en-ljspeech"
+  headers = {
+              "Authorization": f"Bearer {fastspeech_api_token}",
+              "accept": "audio/mpeg", }
+  payload = {"inputs": text, }
+
+  response = requests.post(API_URL, headers=headers, json=payload)
+  # print(response.content)
+
+  # create and playback sound file
+  with open('out.mp3', 'wb') as f:
+      f.write(response.content)
+
+  os.system("mpg123 out.mp3") # TODO issue with writing response content to audio file
+  # play_sound("out.mp3")
+
+# binds all TTS function above to one call
+def do_tts(tts_engine_name: str, text: str):
+  '''
+  Multi text-to-speech synthesis utility.\n
+  tts_engine_name - takes any of string values 'pyttsx3','gtts','elevenlabs'and 'fastspeech2'.\n
+  text - input text string to be converted to speech.
+  '''
+  if tts_engine_name == "pyttsx3":
+    pyttsx3_tts(text)
+  if tts_engine_name == "gtts":
+    gTranslate_tts(text)
+  if tts_engine_name == "elevenlabs":
+    elevenlabs_tts(text)
+  if tts_engine_name== "fastspeech2":
+    fastspeech2_tts(text)
 
 
 # Functions for handing sound file playback
@@ -168,7 +203,7 @@ def main(gpt_version):
 
           #if transcription.lower == "kai":
           print("Yes. How may I be of help?")
-          speak("Yes. How may I be of help?")
+          pyttsx3_tts("Yes. How may I be of help?")
 
           # record audio
           in_audio_filename = "input.wav"
@@ -192,7 +227,7 @@ def main(gpt_version):
 
           if transcript:
             print("You asked: '{}'.".format(transcript))
-            speak("You asked, '{}'.".format(transcript))
+            pyttsx3_tts("You asked, '{}'.".format(transcript))
 
             # generate response
             if gpt_version == "gpt-3":
@@ -206,8 +241,8 @@ def main(gpt_version):
               print("Messages: \n\n{}".format(get_transcript(msg_thread)))
 
             #read out response
-            speak(response)
-            speak("I hope that helped. You can ask your next question.")
+            pyttsx3_tts(response)
+            pyttsx3_tts("I hope that helped. You can ask your next question.")
             time.sleep(2)
 
             # reset counter
@@ -215,7 +250,7 @@ def main(gpt_version):
 
         except sr.RequestError: 
           print("API unavailable")
-          speak("It would appear we have a problem with access to connectivity.")
+          pyttsx3_tts("It would appear we have a problem with access to connectivity.")
 
         except sr.UnknownValueError:
           print("Unable to recognize speech")
@@ -230,7 +265,7 @@ def main(gpt_version):
     # stops session after 5 session loops with no voice prompts from user.
     if no_activity_period_count > 5:
       time.sleep(2)
-      speak("Bye for now.")
+      pyttsx3_tts("Bye for now.")
       break
   
 # main 
