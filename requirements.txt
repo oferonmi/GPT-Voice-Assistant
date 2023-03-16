@@ -2,7 +2,7 @@ openai
 SpeechRecognition
 pyaudio
 pyttsx3
+gTTS
 python-dotenv
 pygame
-gTTS
 gradio
