@@ -152,14 +152,16 @@ def do_tts(tts_engine_name: str, text: str):
   tts_engine_name - takes any of string values 'pyttsx3','gtts','elevenlabs'and 'fastspeech2'.\n
   text - input text string to be converted to speech.
   '''
-  if tts_engine_name == "pyttsx3":
+  if  tts_engine_name=="pyttsx3":
     pyttsx3_tts(text)
-  if tts_engine_name == "gtts":
+  elif tts_engine_name == "gtts":
     gTranslate_tts(text)
-  if tts_engine_name == "elevenlabs":
+  elif tts_engine_name == "elevenlabs":
     elevenlabs_tts(text)
-  if tts_engine_name== "fastspeech2":
+  elif tts_engine_name == "fastspeech2":
     fastspeech2_tts(text)
+  else:
+    gTranslate_tts(text)
 
 
 # Functions for handing sound file playback
