@@ -1,4 +1,4 @@
-# ChatGPT-Voice-Assistant
+# GPT-Voice-Assistant
 An AI voice assistant based of OpenAI's ChatGPT API.
 
 # Usage Instructions
