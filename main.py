@@ -1,6 +1,8 @@
 import openai
 import pyttsx3 as tts
 from gtts import gTTS
+import torch
+# from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan, set_seed
 import speech_recognition as sr
 from pygame import mixer
 import time
@@ -19,7 +21,7 @@ openai.api_key =  os.environ['OPENAI_API_KEY']
 # get eleven labs API key
 elevenlabs_api_key = os.environ['ELEVENLABS_API_KEY']
 # get fastsppech API token from huggingface
-fastspeech_api_token = os.environ['HF_FASTSPEECH_API_TOKEN']
+hf_api_token = os.environ['HF_API_TOKEN']
 
 # activate (Tset to True) or deactivate (set to False) sound that play in idle sessions
 activate_idle_state_sound = True 
@@ -45,14 +47,10 @@ def sr_transcribe(file_name):
   except:
     print("Ah, let's give this another try.")
 
-
 def whisper_transcribe(file_name):
   audio_data= open(file_name, "rb")
-  # try:
   transcript = openai.Audio.transcribe("whisper-1", audio_data)
   return transcript["text"]
-  # except:
-  #   print("Ah, let's give this another try.")
 
 
 # functions using OpenAI API to generate reponse to user query
@@ -127,29 +125,29 @@ def elevenlabs_tts(text):
 
   play_sound("out.mp3") # os.system("mpg123 out.mp3")
 
-def fastspeech2_tts(text):
-  # feed text to remote fastspeech2 speech synthesis model
-  API_URL = "https://api-inference.huggingface.co/models/facebook/fastspeech2-en-ljspeech"
+def hf_tts_query(payload, model_id, api_token):
+  # feed text to remote speech synthesis model
+  API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
   headers = {
-              "Authorization": f"Bearer {fastspeech_api_token}",
-              "accept": "audio/mpeg", }
-  payload = {"inputs": text, }
+              "Authorization": f"Bearer {api_token}",
+              "accept": "audio/mpeg", 
+              "Content-Type": "application/json", 
+            }
 
-  response = requests.post(API_URL, headers=headers, json=payload)
-  # print(response.content)
+  response = requests.post(API_URL, headers=headers, json={"inputs": payload})
 
   # create and playback sound file
   with open('out.mp3', 'wb') as f:
       f.write(response.content)
 
-  os.system("mpg123 out.mp3") # TODO issue with writing response content to audio file
-  # play_sound("out.mp3")
+  os.system("mpg123 out.mp3") # TODO issue with writing response content to audio file 
+  return response.content.json()
 
 # binds all TTS function above to one call
 def do_tts(tts_engine_name: str, text: str):
   '''
   Multi text-to-speech synthesis utility.\n
-  tts_engine_name - takes any of string values 'pyttsx3','gtts','elevenlabs'and 'fastspeech2'.\n
+  tts_engine_name - takes any of string values 'pyttsx3','gtts','elevenlabs', 'fastspeech2' and 'speecht5_tts'.\n
   text - input text string to be converted to speech.
   '''
   if  tts_engine_name=="pyttsx3":
@@ -159,7 +157,12 @@ def do_tts(tts_engine_name: str, text: str):
   elif tts_engine_name == "elevenlabs":
     elevenlabs_tts(text)
   elif tts_engine_name == "fastspeech2":
-    fastspeech2_tts(text)
+    tts_data = hf_tts_query(text, "facebook/fastspeech2-en-ljspeech", hf_api_token) 
+    print(f"fastspeech2 tts_data: {tts_data}")
+  elif tts_engine_name == "speech5":
+      # TODO fix error speech5 tts_data: {'error': 'text-to-speech is not a valid pipeline'}
+      tts_data = hf_tts_query(text, "microsoft/speecht5_tts", hf_api_token)
+      print(f"speecht5 tts_data: {tts_data}")
   else:
     gTranslate_tts(text)
 

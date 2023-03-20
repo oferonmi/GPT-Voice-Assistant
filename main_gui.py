@@ -37,16 +37,6 @@ def transcribe(audio):
     
 
 def main():
-    # tts_out = gr.Interface.load(
-    #             "huggingface/facebook/fastspeech2-en-ljspeech",
-    #             title=None,
-    #             # examples=text_out,
-    #             description="Listen to audio response to your query.",
-    #         )
-
-    # tts_engine = gr.Blocks.load(name="huggingface/facebook/fastspeech2-en-ljspeech")
-    # print(tts_engine)
-               
     with gr.Blocks() as gui:
         with gr.Box():
             gr.Markdown(
@@ -55,30 +45,17 @@ def main():
                 Use the Record to microphone button to ask your question.
                 """
             )
-            audio_in = gr.Audio(source="microphone",  type="filepath")
-            text_out = gr.Textbox(label="Response")
-            audio_out = gr.Audio(label="Audio response playback")
+            with gr.Row():
+                audio_in = gr.Audio(source="microphone",  type="filepath")
+                audio_out = gr.Audio(label="Audio response playback")
+
+            with gr.Row():
+                text_out = gr.Textbox(label="Response")
+
             resp_btn = gr.Button("Get Response")
-            resp_btn.click(fn=transcribe,
-                            inputs=audio_in,
-                            outputs=[text_out, audio_out]
-                        )
+            resp_btn.click(fn=transcribe, inputs=audio_in, outputs=[text_out, audio_out])
             
             gui.launch()
-
-
-# def main():
-#     with gr.Blocks() as gui:
-#         with gr.Box():
-#             audio_in = gr.Audio(source="microphone",  type="filepath")
-#             text_out = gr.Textbox(label="Response")
-#             resp_btn = gr.Button("Get Response")
-
-#         resp_btn.click(fn=transcribe,
-#                        inputs=audio_in,
-#                        outputs=text_out,
-#                        show_progress=True)
-        # gui.launch()
 
 # def main():
     # gui = gr.Interface(fn=transcribe, 
