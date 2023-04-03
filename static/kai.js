@@ -2,6 +2,8 @@
 const recordBtn = document.getElementById('audioInput');
 const recordBtnText = recordBtn.firstElementChild;
 const recordedAudioContainer = document.getElementById('recordedAudioContainer');
+const queryInputText = document.getElementById('qTextInput');
+const getResponsebtn = document.getElementById('getReponseBtn');
 
 let chunks = []; //will be used later to record audio
 let mediaRecorder = null; //will be used later to record audio
@@ -21,6 +23,7 @@ const recordBtnStopView = `
     <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z" /> 
 </svg >
 Record Prompt`;
+
 
 function record(){
     //check if browser supports getUserMedia
@@ -61,9 +64,11 @@ function record(){
 
 recordBtn.addEventListener('click', record);
 
+
 function mediaRecorderDataAvailable(e) {
     chunks.push(e.data);
 }
+
 
 function mediaRecorderStop() {
     //check if there are any previous recordings and remove them
@@ -80,6 +85,13 @@ function mediaRecorderStop() {
     audioBlob = new Blob(chunks, { type: 'audio/mp3' });
     const audioURL = window.URL.createObjectURL(audioBlob);
     audioTag.src = audioURL;
+
+    // if audio recorded, disable text input
+    if (audioBlob != null){
+        queryInputText.setAttribute('readonly','')
+    }
+
+
     //show audio
     // recordedAudioContainer.insertBefore(audioTag, recordedAudioContainer.firstElementChild);
     recordedAudioContainer.appendChild(audioTag);
@@ -94,19 +106,81 @@ function mediaRecorderStop() {
 
     discardButton.addEventListener('click', discardRecording)
 
+    //hide record button
+    recordBtn.classList.add('d-none')
+
     //reset to default
     mediaRecorder = null;
     chunks = [];
 }
 
+
 function discardRecording() {
-    if (recordedAudioContainer.firstElementChild != null) {
-        //remove the audio tag for recorded audio playback
-        recordedAudioContainer.firstElementChild.remove();
-        //hide recordedAudioContainer
-        recordedAudioContainer.classList.add('d-none');
-        recordedAudioContainer.classList.remove('d-flex');
-    }
-    //reset audioBlob for the next recording
-    audioBlob = null;
+  if (recordedAudioContainer.firstElementChild != null) {
+      //remove the audio tag for recorded audio playback
+      recordedAudioContainer.firstElementChild.remove();
+      //hide recordedAudioContainer
+      recordedAudioContainer.classList.add('d-none');
+      recordedAudioContainer.classList.remove('d-flex');
+  }
+  //reset audioBlob for the next recording
+  audioBlob = null;
+
+  // display record button
+  recordBtn.classList.remove('d-none')
+
+  // activate query text input 
+  queryInputText.removeAttribute('readonly')
 };
+
+async function postPromptData(data) {
+  const response = await fetch("/resources/kai/prompt_processor", {
+    method: "POST",
+    body: data,
+  })
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${reponse.status}`)
+  }
+
+  getResponsebtn.innerHTML = `Get Response`;
+  getResponsebtn.removeAttribute('disabled','');
+  window.location.reload(true) // reload page to reflect new data
+  return response;
+}
+
+
+function processInputPrompt(){
+  //form data to hold the Blob to send in user HTML request
+  const formData = new FormData();
+
+  //add the audio blob or query text to formData
+  if (audioBlob != null){
+      formData.append('audio', audioBlob, 'voice_prompt.mp3');
+  } else {
+      if (queryInputText.value != null){
+          formData.append('text', queryInputText.value);
+      }  
+  }
+
+  // for debug purpose. comment in production deployment
+  // console.log(formData.has('audio') || formData.get('text').length != 0); 
+
+  // send POST request if user input is provided
+  if (formData.has('audio') || formData.get('text').length != 0){
+      // disable button and indicate processing 
+      getResponsebtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  Processing...`;
+      getResponsebtn.setAttribute('disabled','');
+
+      // send request
+      //const request = new XMLHttpRequest();
+      //request.open('POST', '/resources/kai/query_processor');
+      //request.send(formData);
+      const response = postPromptData(formData);
+      //console.log(response);
+  }
+    
+}
+
+getResponsebtn.addEventListener('click', processInputPrompt)

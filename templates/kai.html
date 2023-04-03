@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>KAI: Source Knowledge using AI</title>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md">
+                <h1 class="display-2">KAI</h1>
+                <p class="lead"><span class="fw-bolder">K</span>nowledge-sourcing <span class="fw-bolder">AI Tool</span></p>
+            </div>
+        </div>
+        <!--<form> -->
+        <div class="row align-items-start">
+            <div class="col-md-4">
+                <label for="audioInput">Audio Input:</label><br>
+                <button type="button" class="btn btn-outline-dark btn-lg rounded-pill" id="audioInput" name="audioInput">
+                    <div id="audioInputContent">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-mic-fill text-danger" viewBox="0 0 16 16">
+                            <path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0V3z" />
+                            <path
+                                d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5z" />
+                        </svg>
+                        Record Prompt
+                    </div>
+                </button>
+    
+                <div class="d-none" id="recordedAudioContainer">
+                </div>
+                <br><br>
+    
+                <p class="fs-4 text-center">OR</p><br>
+    
+                <label for="qTextInput">Text Input:</label><br>
+                <input type="text" class="form-control" id="qTextInput" name="qTextInput"
+                    placeholder="Type in your question" aria-describedby="inputGroup-sizing-lg">
+                <br><br>
+                <label for="audioOutput">Audio Output Playback:</label><br>
+                <div class="d-flex" id="audioPlaybackContainer">
+                    <audio id="audioOutput" controls>
+                        <source src="/static/out.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <br><br>
+            </div>
+    
+            <div class="col-md-8">
+                <label for="textArea">Conversation Thread:</label><br>
+                <textarea class="form-control bg-dark-subtle" id="textArea" name="textArea"
+                    placeholder="Your conversation thread appears here" style="height: 350px;"
+                    readonly>{{transcript}}</textarea>
+                <br><br>
+            </div>
+        </div>
+    
+        <div class="align-items-start">
+            <!--<input type="submit" value="Get Response"> -->
+            <button type="submit" class="btn btn-dark btn-lg rounded-pill" id="getReponseBtn">Get Response</button>
+        </div>
+        <!-- </form> -->
+    </div>
+    <!-- Mandtory JavaScript -->
+    <script src="/static/kai.js"></script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+        integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD"
+        crossorigin="anonymous"></script>
+</body>
+</html>
